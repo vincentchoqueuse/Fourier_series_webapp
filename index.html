@@ -1,0 +1,247 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <title>Fourier Audio Synthesis</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+        <script src='http://code.highcharts.com/highcharts.js'></script>
+        <script src='js/mindmup-editabletable.js'></script>
+        <script>
+            var plot_chart;
+            var Fe=100.;
+            var f=1.;
+            
+         
+             function compute_spectrum()
+             {
+                 signal=new Array(100);
+                 signal_temp=new Array(100);
+                 // Array initialisation
+                 for(var n=0;n<100;n++)
+                 {
+                     signal[n]=0.;
+                 }
+                 for (var k=0;k<=8;k++)
+                 {
+                     ak=parseFloat($('#a'+k).text());
+                     bk=parseFloat($('#b'+k).text());
+                     
+                     for(var n=0;n<100;n++)
+                     {
+                         signal_temp[n]=ak*Math.cos(2*Math.PI*k*f*n/Fe)+bk*Math.sin(2*Math.PI*f*k*n/Fe);
+                         signal[n]=signal[n]+ak*Math.cos(2*Math.PI*k*f*n/Fe)+bk*Math.sin(2*Math.PI*f*k*n/Fe);
+                     }
+                     plot_chart.series[k+1].setData(signal_temp);
+                 }
+                 plot_chart.series[0].setData(signal);
+             }
+             
+                
+            $(function() {
+                $('#mytable').editableTableWidget();
+                $('#mytable td').on('change', function(evt, newValue) {
+                              compute_spectrum();
+                              });
+              
+                $("#zero").click(function(e) {
+                    for (var k=0;k<=8;k++)
+                    {
+                        $('#a'+k).text("0.0");
+                        $('#b'+k).text("0.0");
+                    }
+                    compute_spectrum();
+                    e.preventDefault();
+                });
+
+                $("#square").click(function(e) {
+                    $('#a0').text("0.0");
+                    $('#b0').text("0.0");
+                    for (var k=1;k<=8;k++)
+                    {
+                        $('#a'+k).text("0.0");
+                        num=(k%2)*1.0/k;
+                        $('#b'+k).text(num.toFixed(3));
+                    }
+                    compute_spectrum();
+                    e.preventDefault();
+                });
+
+                $("#sawtooth").click(function(e) {
+                    $('#a0').text("0.0");
+                    $('#b0').text("0.0");
+                    for (var k=1;k<=8;k++)
+                    {
+                        $('#a'+k).text("0.0");
+                        num=1.0/k;
+                        $('#b'+k).text(num.toFixed(3));
+                    }
+                    compute_spectrum();
+                    e.preventDefault();
+                });
+
+          
+                plot_chart=new Highcharts.Chart({
+                      chart:{
+                      zoomType: 'x',
+                      renderTo: 'plot',
+                      },
+                      title: {text: '',},
+                      credits: {enabled: false},
+                      xAxis: {
+                      min: 0,
+                      title: {
+                      text: 'Time (sec)'
+                      }
+                      },
+                      yAxis: {
+                      title: {
+                      text: 'Output'
+                      }
+                      },
+                      tooltip: {
+                      crosshairs: [true,true],
+                      formatter: function() {
+                      return '<b>t</b>:' + this.x.toFixed(2) + '<br><b>Output</b>:' + this.y.toFixed(3);
+                      }
+                      },
+                      plotOptions: {
+                      series: {
+                      animation: false,
+                      marker: {
+                      enabled: false
+                      }
+                      }
+                      },
+                      series:[{name:"Total",data:[[0,0]],pointInterval: 1.0/Fe},
+                              {name:"H0",data:[[0,0]],pointInterval: 1.0/Fe},
+                              {name:"H1",data:[[0,0]],pointInterval: 1.0/Fe},
+                              {name:"H2",data:[[0,0]],pointInterval: 1.0/Fe},
+                              {name:"H3",data:[[0,0]],pointInterval: 1.0/Fe},
+                              {name:"H4",data:[[0,0]],pointInterval: 1.0/Fe},
+                              {name:"H5",data:[[0,0]],pointInterval: 1.0/Fe},
+                              {name:"H6",data:[[0,0]],pointInterval: 1.0/Fe},
+                              {name:"H7",data:[[0,0]],pointInterval: 1.0/Fe},
+                              {name:"H8",data:[[0,0]],pointInterval: 1.0/Fe},
+                              
+                              ]
+                      });
+                    compute_spectrum();
+                });
+            </script>
+            </script>
+    </head>
+    
+    <body >
+        <div class="container">
+            <a href="https://github.com/vincentchoqueuse"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://camo.githubusercontent.com/567c3a48d796e2fc06ea80409cc9dd82bf714434/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f6c6566745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_left_darkblue_121621.png"></a>
+            
+            <div class="pull-right">
+                <div class="btn-group" style="margin-top:40px;">
+                    <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">Coefficients Presets <span class="caret"></span></button>
+                    <ul class="dropdown-menu">
+                        <li><a href="#" id="zero">Zero Signal</a></li>
+                        <li><a href="#" id="square">Square</a></li>
+                        <li><a href="#" id="sawtooth">Sawtooth</a></li>
+                    </ul>
+                </div><!-- /btn-group -->
+            </div>
+            
+            <h1 class="page-header">Fourier Series</h1>
+            
+
+                <div class="row">
+                    <div class="col-md-4">
+                        
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Fourier Coefficients</h3>
+                            </div>
+                            <div class="panel-body">
+                                <table id="mytable" class="table">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-md-4">k</th>
+                                            <th class="col-md-4">ak</th>
+                                            <th class="col-md-4">bk</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <th>0</th>
+                                            <td id="a0">0.0</td>
+                                            <td id="b0">0.0</td>
+                                        </tr>
+                                        <tr>
+                                            <th>1</th>
+                                            <td id="a1">0.0</td>
+                                            <td id="b1">1.0</td>
+                                        </tr>
+                                        <tr>
+                                            <th>2</th>
+                                            <td id="a2">0.0</td>
+                                            <td id="b2">0.0</td>
+                                        </tr>
+                                        <tr>
+                                            <th>3</th>
+                                            <td id="a3">0.0</td>
+                                            <td id="b3">0.333</td>
+                                        </tr>
+                                        <tr>
+                                            <th>4</th>
+                                            <td id="a4">0.0</td>
+                                            <td id="b4">0.0</td>
+                                        </tr>
+                                        <tr>
+                                            <th>5</th>
+                                            <td id="a5">0.0</td>
+                                            <td id="b5">0.200</td>
+                                        </tr>
+                                        <tr>
+                                            <th>6</th>
+                                            <td id="a6">0.</td>
+                                            <td id="b6">0.</td>
+                                        </tr>
+                                        <tr>
+                                            <th>7</th>
+                                            <td id="a7">0.</td>
+                                            <td id="b7">0.142</td>
+                                        </tr>
+                                        <tr>
+                                            <th>8</th>
+                                            <td id="a8">0.</td>
+                                            <td id="b8">0.</td>
+                                        </tr>
+                                        </thead>
+                                        
+                                        </table>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8" >
+                        <!-- Nav tabs -->
+                        
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active"><a href="#step" role="tab" data-toggle="tab">Time Representation</a></li>
+                        </ul>
+                        
+                        <!-- Tab panes -->
+                        <div class="tab-content" >
+                            <div role="tabpanel" class="tab-pane active " id="step">
+                                <div id="plot" style="width:100%;height: 400px; margin: 0 auto"></div>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            <footer style="text-align:center;padding-top:20px;">
+                <p>Developed by: <a href="http://www.v-choqueuse.com">
+                    Vincent Choqueuse</a></p>
+            </footer>
+        </div>
+        
+    </body>
+</html>
