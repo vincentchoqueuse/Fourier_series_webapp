@@ -1,5 +1,5 @@
-# Fourier_synthesis_web_audio
+# Fourier_synthesis
 
-This application implements a periodic signal synthesizer. 
+This [web application](http://vincentchoqueuse.github.io/Fourier_series_webapp) implements a periodic signal synthesizer. 
 
 ![Fourier Synthesis Application](screenshot.jpg)
